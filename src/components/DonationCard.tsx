@@ -106,13 +106,15 @@ export const DonationCard = () => {
 
             {finalAmount && Number(finalAmount) > 0 && (
               <PayPalScriptProvider options={{ 
-                "client-id": "test", // Replace with your PayPal client ID
-                currency: "USD"
+                clientId: "test", // Replace with your PayPal client ID
+                currency: "USD",
+                intent: "capture"
               }}>
                 <PayPalButtons
                   style={{ layout: "vertical" }}
                   createOrder={(data, actions) => {
                     return actions.order.create({
+                      intent: "CAPTURE",
                       purchase_units: [
                         {
                           amount: {
