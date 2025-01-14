@@ -8,12 +8,15 @@ import { Label } from "@/components/ui/label";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 import { useToast } from "@/components/ui/use-toast";
+import { initiateMpesaPayment } from "@/utils/mpesa";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const PRESET_AMOUNTS = [200, 500, 1000, 5000, 10000, 20000];
 
 export const DonationCard = () => {
   const [amount, setAmount] = useState<string>("1000");
   const [customAmount, setCustomAmount] = useState<string>("");
+  const [phoneNumber, setPhoneNumber] = useState<string>("");
   const { toast } = useToast();
 
   const handleAmountChange = (value: string) => {
@@ -29,10 +32,15 @@ export const DonationCard = () => {
     setAmount("custom");
   };
 
+  const handlePhoneNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace(/[^0-9]/g, "");
+    setPhoneNumber(value);
+  };
+
   const finalAmount = amount === "custom" ? customAmount : amount;
   const finalAmountUSD = Number(finalAmount) / 150; // Approximate KES to USD conversion
 
-  const handleDonate = () => {
+  const handleMpesaPayment = async () => {
     if (!finalAmount || Number(finalAmount) <= 0) {
       toast({
         title: "Invalid Amount",
@@ -41,7 +49,29 @@ export const DonationCard = () => {
       });
       return;
     }
-    window.open("tel:07111111");
+
+    if (!phoneNumber || phoneNumber.length !== 10) {
+      toast({
+        title: "Invalid Phone Number",
+        description: "Please enter a valid M-PESA phone number (10 digits)",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const response = await initiateMpesaPayment(phoneNumber, Number(finalAmount));
+      toast({
+        title: "Payment Initiated",
+        description: "Please check your phone for the STK push",
+      });
+    } catch (error) {
+      toast({
+        title: "Payment Failed",
+        description: "Failed to initiate M-PESA payment. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -105,44 +135,72 @@ export const DonationCard = () => {
             )}
 
             {finalAmount && Number(finalAmount) > 0 && (
-              <PayPalScriptProvider options={{ 
-                clientId: "BAA9NI-M9-_R2nbXJr42mmOeUYdSbmQ7zbzluHlrfgnUHQE5dV_r1Ks0TC85ZeMiei_giiboY3wVcEoo3o",
-                currency: "USD",
-                intent: "capture"
-              }}>
-                <PayPalButtons
-                  style={{ layout: "vertical" }}
-                  createOrder={(data, actions) => {
-                    return actions.order.create({
-                      intent: "CAPTURE",
-                      purchase_units: [
-                        {
-                          amount: {
-                            value: finalAmountUSD.toFixed(2),
-                            currency_code: "USD"
-                          },
-                          description: "Donation for Moses's Recovery"
-                        },
-                      ],
-                    });
-                  }}
-                  onApprove={(data, actions) => {
-                    return actions.order.capture().then((details) => {
-                      toast({
-                        title: "Thank you for your donation!",
-                        description: `Transaction completed by ${details.payer.name?.given_name}`,
-                      });
-                    });
-                  }}
-                  onError={() => {
-                    toast({
-                      title: "Payment Error",
-                      description: "There was an error processing your payment. Please try again.",
-                      variant: "destructive",
-                    });
-                  }}
-                />
-              </PayPalScriptProvider>
+              <Tabs defaultValue="mpesa" className="w-full">
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="mpesa">M-PESA</TabsTrigger>
+                  <TabsTrigger value="paypal">PayPal</TabsTrigger>
+                </TabsList>
+                <TabsContent value="mpesa" className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="phone-number">M-PESA Phone Number</Label>
+                    <Input
+                      id="phone-number"
+                      type="text"
+                      value={phoneNumber}
+                      onChange={handlePhoneNumberChange}
+                      placeholder="e.g., 0712345678"
+                      maxLength={10}
+                      className="text-lg"
+                    />
+                  </div>
+                  <Button 
+                    onClick={handleMpesaPayment}
+                    className="w-full py-6 text-lg font-semibold"
+                  >
+                    Pay with M-PESA
+                  </Button>
+                </TabsContent>
+                <TabsContent value="paypal">
+                  <PayPalScriptProvider options={{ 
+                    clientId: "BAA9NI-M9-_R2nbXJr42mmOeUYdSbmQ7zbzluHlrfgnUHQE5dV_r1Ks0TC85ZeMiei_giiboY3wVcEoo3o",
+                    currency: "USD",
+                    intent: "capture"
+                  }}>
+                    <PayPalButtons
+                      style={{ layout: "vertical" }}
+                      createOrder={(data, actions) => {
+                        return actions.order.create({
+                          intent: "CAPTURE",
+                          purchase_units: [
+                            {
+                              amount: {
+                                value: finalAmountUSD.toFixed(2),
+                                currency_code: "USD"
+                              },
+                              description: "Donation for Moses's Recovery"
+                            },
+                          ],
+                        });
+                      }}
+                      onApprove={(data, actions) => {
+                        return actions.order.capture().then((details) => {
+                          toast({
+                            title: "Thank you for your donation!",
+                            description: `Transaction completed by ${details.payer.name?.given_name}`,
+                          });
+                        });
+                      }}
+                      onError={() => {
+                        toast({
+                          title: "Payment Error",
+                          description: "There was an error processing your payment. Please try again.",
+                          variant: "destructive",
+                        });
+                      }}
+                    />
+                  </PayPalScriptProvider>
+                </TabsContent>
+              </Tabs>
             )}
 
             <div className="text-sm text-center text-gray-500 space-y-2">
