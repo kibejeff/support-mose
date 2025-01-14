@@ -6,12 +6,15 @@ import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
+import { useToast } from "@/components/ui/use-toast";
 
 const PRESET_AMOUNTS = [200, 500, 1000, 5000, 10000, 20000];
 
 export const DonationCard = () => {
   const [amount, setAmount] = useState<string>("1000");
   const [customAmount, setCustomAmount] = useState<string>("");
+  const { toast } = useToast();
 
   const handleAmountChange = (value: string) => {
     setAmount(value);
@@ -27,11 +30,15 @@ export const DonationCard = () => {
   };
 
   const finalAmount = amount === "custom" ? customAmount : amount;
+  const finalAmountUSD = Number(finalAmount) / 150; // Approximate KES to USD conversion
 
   const handleDonate = () => {
-    // For now, we'll keep the phone number as a fallback
     if (!finalAmount || Number(finalAmount) <= 0) {
-      alert("Please enter a valid amount");
+      toast({
+        title: "Invalid Amount",
+        description: "Please enter a valid donation amount",
+        variant: "destructive",
+      });
       return;
     }
     window.open("tel:07111111");
@@ -97,17 +104,49 @@ export const DonationCard = () => {
               </div>
             )}
 
-            <Button 
-              onClick={handleDonate}
-              className="w-full py-6 text-lg font-semibold"
-              disabled={!finalAmount || Number(finalAmount) <= 0}
-            >
-              Donate KSH {Number(finalAmount).toLocaleString() || '0'}
-            </Button>
+            {finalAmount && Number(finalAmount) > 0 && (
+              <PayPalScriptProvider options={{ 
+                "client-id": "test", // Replace with your PayPal client ID
+                currency: "USD"
+              }}>
+                <PayPalButtons
+                  style={{ layout: "vertical" }}
+                  createOrder={(data, actions) => {
+                    return actions.order.create({
+                      purchase_units: [
+                        {
+                          amount: {
+                            value: finalAmountUSD.toFixed(2),
+                            currency_code: "USD"
+                          },
+                          description: "Donation for Moses's Recovery"
+                        },
+                      ],
+                    });
+                  }}
+                  onApprove={(data, actions) => {
+                    return actions.order.capture().then((details) => {
+                      toast({
+                        title: "Thank you for your donation!",
+                        description: `Transaction completed by ${details.payer.name?.given_name}`,
+                      });
+                    });
+                  }}
+                  onError={() => {
+                    toast({
+                      title: "Payment Error",
+                      description: "There was an error processing your payment. Please try again.",
+                      variant: "destructive",
+                    });
+                  }}
+                />
+              </PayPalScriptProvider>
+            )}
 
-            <p className="text-sm text-center text-gray-500">
-              Contact our treasurer: 07111111
-            </p>
+            <div className="text-sm text-center text-gray-500 space-y-2">
+              <p>Amount in USD: ${finalAmountUSD.toFixed(2)}</p>
+              <p>Alternative payment: Contact our treasurer at 07111111</p>
+            </div>
           </div>
         </SheetContent>
       </Sheet>
