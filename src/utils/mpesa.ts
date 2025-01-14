@@ -8,7 +8,7 @@ interface MpesaResponse {
 
 export const initiateMpesaPayment = async (phoneNumber: string, amount: number): Promise<MpesaResponse> => {
   try {
-    const response = await fetch('YOUR_BACKEND_ENDPOINT/mpesa/stkpush', {
+    const response = await fetch('https://api.safaricom.co.ke/mpesa/stkpush/v1/processrequest', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
