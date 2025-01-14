@@ -106,7 +106,7 @@ export const DonationCard = () => {
 
             {finalAmount && Number(finalAmount) > 0 && (
               <PayPalScriptProvider options={{ 
-                clientId: "test", // Replace with your PayPal client ID
+                clientId: "BAA9NI-M9-_R2nbXJr42mmOeUYdSbmQ7zbzluHlrfgnUHQE5dV_r1Ks0TC85ZeMiei_giiboY3wVcEoo3o",
                 currency: "USD",
                 intent: "capture"
               }}>
