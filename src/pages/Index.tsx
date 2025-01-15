@@ -8,7 +8,7 @@ const Index = () => {
         <img
           src="/lovable-uploads/66f12c95-7ba2-4e28-9df0-150211d3106b.png"
           alt="Support Banner"
-          className="w-full h-full object-contain object-top"
+          className="w-full h-full object-cover"
         />
         <div className="absolute inset-0 bg-black/40" />
       </div>
