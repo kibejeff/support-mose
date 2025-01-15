@@ -94,7 +94,7 @@ export const DonationCard = () => {
             Support Now
           </Button>
         </SheetTrigger>
-        <SheetContent>
+        <SheetContent className="overflow-y-auto">
           <SheetHeader>
             <SheetTitle>Choose Donation Amount</SheetTitle>
             <SheetDescription>
