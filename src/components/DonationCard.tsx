@@ -91,7 +91,7 @@ export const DonationCard = () => {
           <Button 
             className="w-full py-6 text-lg font-semibold transition-all hover:scale-[1.02]"
           >
-            Donate Now
+            Support Now
           </Button>
         </SheetTrigger>
         <SheetContent>
@@ -205,7 +205,7 @@ export const DonationCard = () => {
 
             <div className="text-sm text-center text-gray-500 space-y-2">
               <p>Amount in USD: ${finalAmountUSD.toFixed(2)}</p>
-              <p>Alternative payment: Contact our treasurer at 07111111</p>
+              <p>Alternative payment: Contact our treasurer at 0711405117</p>
             </div>
           </div>
         </SheetContent>

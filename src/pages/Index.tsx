@@ -6,7 +6,7 @@ const Index = () => {
       {/* Hero Section */}
       <div className="relative h-[40vh] md:h-[50vh] overflow-hidden">
         <img
-          src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=2400&q=80"
+          src="/lovable-uploads/66f12c95-7ba2-4e28-9df0-150211d3106b.png"
           alt="Support Banner"
           className="w-full h-full object-cover"
         />
@@ -31,7 +31,7 @@ const Index = () => {
                 </p>
                 <p className="text-gray-600 leading-relaxed mt-4">
                   We kindly request your financial and moral support to help cover the remaining balance and ongoing costs. 
-                  Contributions can be sent to our group treasurer, Mrs. Caroline Maina, at <strong>07111111</strong>.
+                  Contributions can be sent to our group treasurer, Mrs. Caroline Maina, at <strong>0711405117</strong>.
                 </p>
                 <p className="text-gray-600 italic mt-4">
                   Your generosity will make a difference. God bless you for your kindness and support.
