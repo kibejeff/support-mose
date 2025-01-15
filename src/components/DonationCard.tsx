@@ -11,6 +11,10 @@ export function DonationCard() {
   const [amount, setAmount] = useState("");
   const { toast } = useToast();
 
+  // Hardcoded values for demonstration - in production these should come from your backend
+  const currentAmount = 1000000; // 1M KSh raised
+  const goalAmount = 2600000;    // 2.6M KSh goal
+
   const handleMpesaPayment = async () => {
     try {
       // Mpesa payment logic here
@@ -31,7 +35,7 @@ export function DonationCard() {
     <Card className="w-full md:w-[300px] p-6">
       <div className="space-y-4">
         <h2 className="text-xl font-bold">Support Moses</h2>
-        <DonationProgress />
+        <DonationProgress current={currentAmount} goal={goalAmount} />
         
         <div className="space-y-2">
           <label htmlFor="amount" className="text-sm font-medium">
@@ -74,6 +78,7 @@ export function DonationCard() {
                   createOrder={(data, actions) => {
                     try {
                       return actions.order.create({
+                        intent: "CAPTURE",
                         purchase_units: [
                           {
                             amount: {
@@ -94,12 +99,13 @@ export function DonationCard() {
                   }}
                   onApprove={async (data, actions) => {
                     try {
-                      const details = await actions.order?.capture();
-                      toast({
-                        title: "Payment Successful",
-                        description: "Thank you for your donation!",
-                      });
-                      return details;
+                      if (actions.order) {
+                        await actions.order.capture();
+                        toast({
+                          title: "Payment Successful",
+                          description: "Thank you for your donation!",
+                        });
+                      }
                     } catch (error) {
                       toast({
                         title: "Payment Error",
